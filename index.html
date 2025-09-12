@@ -1,67 +1,263 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Школьный AI Помощник 🤖</title>
-<style>
-body{font-family:sans-serif;background:#2E8B57;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;}
-.container{background:#f0fff0;border-radius:20px;width:90%;max-width:800px;padding:20px;}
-.messages{height:400px;overflow-y:auto;margin-bottom:10px;border:1px solid #90ee90;padding:10px;border-radius:10px;}
-.message{margin-bottom:10px;}
-.bot{color:#2F4F2F;background:#90ee90;padding:10px;border-radius:10px;display:inline-block;}
-.user{color:white;background:#32cd32;padding:10px;border-radius:10px;display:inline-block;float:right;}
-.input-row{display:flex;gap:10px;}
-input[type=text]{flex:1;padding:10px;border-radius:10px;border:1px solid #32cd32;}
-button{padding:10px 20px;border-radius:10px;border:none;background:#228B22;color:white;cursor:pointer;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Школьный AI Помощник 🤖</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, #2E8B57, #90EE90, #32CD32, #228B22);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(46, 139, 87, 0.3);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+            border: 1px solid rgba(144, 238, 144, 0.3);
+        }
+        .header {
+            background: linear-gradient(135deg, #228B22, #32CD32);
+            padding: 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {0% { left: -100%; } 100% { left: 100%; }}
+        .header h1 {font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);}
+        .header p {font-size: 1.1em; opacity: 0.9;}
+        .chat-container {height: 500px; display: flex; flex-direction: column;}
+        .messages {flex: 1; overflow-y: auto; padding: 20px; background: linear-gradient(180deg, #F0FFF0, #E6FFE6);}
+        .message {margin-bottom: 15px; display: flex; align-items: flex-start; animation: fadeIn 0.5s ease-in;}
+        @keyframes fadeIn {from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); }}
+        .bot-message {justify-content: flex-start;}
+        .user-message {justify-content: flex-end;}
+        .message-content {max-width: 70%; padding: 15px 20px; border-radius: 20px; font-size: 1em; line-height: 1.4; box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
+        .bot-message .message-content {background: linear-gradient(135deg, #98FB98, #90EE90); color: #2F4F2F; border-bottom-left-radius: 5px; border: 1px solid rgba(50, 205, 50, 0.3);}
+        .user-message .message-content {background: linear-gradient(135deg, #32CD32, #228B22); color: white; border-bottom-right-radius: 5px;}
+        .input-container {padding: 20px; background: rgba(240, 255, 240, 0.8); border-top: 1px solid rgba(144, 238, 144, 0.5);}
+        .input-row {display: flex; gap: 10px; margin-bottom: 15px; align-items: center;}
+        .input-box {flex: 1; padding: 15px 20px; border: 2px solid #90EE90; border-radius: 25px; font-size: 1em; outline: none; transition: all 0.3s ease; background: rgba(255, 255, 255, 0.9);}
+        .input-box:focus {border-color: #32CD32; box-shadow: 0 0 20px rgba(50, 205, 50, 0.3); transform: translateY(-2px);}
+        .file-input-container {position: relative; display: inline-block;}
+        .file-input {position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;}
+        .file-button {padding: 15px 20px; background: linear-gradient(135deg, #90EE90, #32CD32); color: #2F4F2F; border: none; border-radius: 20px; cursor: pointer; font-size: 1em; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;}
+        .file-button:hover {transform: translateY(-3px); box-shadow: 0 8px 25px rgba(50, 205, 50, 0.4);}
+        .send-btn {padding: 15px 25px; background: linear-gradient(135deg, #32CD32, #228B22); color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 1em; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(34, 139, 34, 0.3);}
+        .send-btn:hover {transform: translateY(-3px); box-shadow: 0 8px 25px rgba(34, 139, 34, 0.5);}
+        .send-btn:disabled {opacity: 0.6; cursor: not-allowed; transform: none;}
+        .quick-buttons {display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;}
+        .quick-btn {padding: 8px 15px; background: rgba(152, 251, 152, 0.7); border: 2px solid #90EE90; border-radius: 15px; cursor: pointer; font-size: 0.9em; color: #2F4F2F; transition: all 0.3s ease; backdrop-filter: blur(10px);}
+        .quick-btn:hover {background: #32CD32; color: white; transform: translateY(-2px);}
+        .typing {display: none; padding: 10px 20px; color: #2F4F2F; font-style: italic; animation: pulse 2s infinite;}
+        @keyframes pulse {0%, 100% { opacity: 1; } 50% { opacity: 0.5; }}
+        .bot-avatar {width: 35px; height: 35px; background: linear-gradient(135deg, #32CD32, #228B22); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; color: white; font-weight: bold; font-size: 1.2em; box-shadow: 0 4px 12px rgba(50, 205, 50, 0.4);}
+        .user-avatar {width: 35px; height: 35px; background: linear-gradient(135deg, #FF6B35, #F7931E); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 10px; color: white; font-weight: bold; font-size: 1.2em; box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);}
+        .image-preview {max-width: 200px; max-height: 150px; border-radius: 10px; margin: 10px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2);}
+        .file-name {font-size: 0.8em; color: #2F4F2F; margin-top: 5px; padding: 5px 10px; background: rgba(144, 238, 144, 0.3); border-radius: 10px; display: inline-block;}
+        .loading-dots::after {content: ''; animation: loadingDots 1.5s infinite;}
+@keyframes loadingDots {0%,20%{content:'.';}40%{content:'..';}60%,100%{content:'...';}}
+@media (max-width: 600px) {
+    .container {margin: 10px; border-radius: 20px;}
+    .header h1 {font-size: 2em;}
+    .input-row {flex-direction: column; gap: 10px;}
+    .quick-buttons {justify-content: center;}
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="messages" id="messages"></div>
-  <div class="input-row">
-    <input type="text" id="userInput" placeholder="Напиши вопрос...">
-    <button onclick="sendMessage()">Отправить</button>
-  </div>
+    <div class="header">
+        <h1>🤖 Умный Школьный Помощник</h1>
+        <p>Powered by Gemini 2.0 Flash • Решаю задачи и анализирую картинки!</p>
+    </div>
+    
+    <div class="chat-container">
+        <div class="messages" id="messages">
+            <div class="message bot-message">
+                <div class="bot-avatar">🤖</div>
+                <div class="message-content">
+                    Привет! Я умный школьный помощник на основе Gemini 2.0 Flash! 🚀
+                    <br><br>
+                    Могу помочь с:
+                    • Решением задач по любым предметам 📚
+                    • Анализом картинок и фотографий 📸
+                    • Объяснением сложных тем простым языком 💡
+                    • Проверкой домашних заданий ✅
+                    <br><br>
+                    Просто напиши вопрос или прикрепи картинку!
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing" id="typing">
+            <div class="bot-avatar">🤖</div>
+            <span class="loading-dots">Думаю</span>
+        </div>
+        
+        <div class="input-container">
+            <div class="input-row">
+                <div class="file-input-container">
+                    <input type="file" class="file-input" id="fileInput" accept="image/*" onchange="handleFileSelect(event)">
+                    <div class="file-button">📷 Фото</div>
+                </div>
+                <input type="text" class="input-box" id="userInput" placeholder="Задай вопрос или опиши проблему..." maxlength="1000">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">Отправить</button>
+            </div>
+            
+            <div class="quick-buttons">
+                <div class="quick-btn" onclick="quickQuestion('Реши эту математическую задачу пошагово')">📐 Математика</div>
+                <div class="quick-btn" onclick="quickQuestion('Объясни эту тему по физике простыми словами')">⚡ Физика</div>
+                <div class="quick-btn" onclick="quickQuestion('Помоги с химической реакцией')">🧪 Химия</div>
+                <div class="quick-btn" onclick="quickQuestion('Проверь мое домашнее задание')">✅ Проверка ДЗ</div>
+                <div class="quick-btn" onclick="quickQuestion('Что на этой картинке?')">📸 Анализ фото</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-const WEBHOOK_URL = "ВАШ_WEBHOOK_URL"; // вставь сюда вебхук Make
+let currentImage = null;
 
-function addMessage(text, isUser=false) {
-  const msgDiv = document.createElement('div');
-  msgDiv.className = 'message ' + (isUser ? 'user' : 'bot');
-  msgDiv.innerText = text;
-  document.getElementById('messages').appendChild(msgDiv);
-  document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+function addMessage(content, isUser = false, imageData = null) {
+    const messagesContainer = document.getElementById('messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+    
+    let imageHTML = '';
+    if (imageData) {
+        imageHTML = `<img src="${imageData}" alt="Загруженное изображение" class="image-preview">`;
+    }
+    
+    messageDiv.innerHTML = `
+        <div class="${isUser ? 'user-avatar' : 'bot-avatar'}">
+            ${isUser ? '👤' : '🤖'}
+        </div>
+        <div class="message-content">
+            ${imageHTML}
+            ${content}
+        </div>
+        ${isUser ? '<div class="user-avatar">👤</div>' : ''}
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function showTyping() {
+    document.getElementById('typing').style.display = 'flex';
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+}
+
+function hideTyping() {
+    document.getElementById('typing').style.display = 'none';
 }
 
 async function sendMessage() {
-  const input = document.getElementById('userInput');
-  const text = input.value.trim();
-  if(!text) return;
-  addMessage(text, true);
-  input.value = '';
+    const input = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const message = input.value.trim();
+    
+    if (!message && !currentImage) return;
+    
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Отправляю...';
+    
+    const userMessage = message || 'Анализ изображения';
+    addMessage(userMessage, true, currentImage);
+    input.value = '';
+    showTyping();
 
-  try {
-    const res = await fetch(https://hook.eu2.make.com/3v71c6fgk78yf4q7hopcuou4hju8xgch, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({text})
-    });
-    const data = await res.json();
-    if(data.reply) addMessage(data.reply);
-    else addMessage('Ошибка: нет ответа от сервера 😅');
-  } catch(e) {
-    console.error(e);
-    addMessage('Ошибка при отправке запроса 😅');
-  }
+    try {
+        const payload = {
+            text: message,
+            image: currentImage
+        };
+
+        const response = await fetch('https://hook.eu2.make.com/3v71c6fgk78yf4q7hopcuou4hju8xgch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        hideTyping();
+
+        if (data.reply) {
+            addMessage(data.reply);
+        } else {
+            addMessage('Извини, ответа пока нет 😅');
+        }
+    } catch (error) {
+        console.error(error);
+        hideTyping();
+        addMessage('Ошибка при отправке запроса 😅');
+    }
+
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Отправить';
+    currentImage = null;
 }
 
-// Отправка по Enter
-document.getElementById('userInput').addEventListener('keypress', e => {
-  if(e.key === 'Enter') sendMessage();
+function quickQuestion(question) {
+    document.getElementById('userInput').value = question;
+    sendMessage();
+}
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            currentImage = e.target.result;
+            const fileButton = document.querySelector('.file-button');
+            fileButton.innerHTML = '✅ Фото выбрано';
+            fileButton.style.background = 'linear-gradient(135deg, #98FB98, #90EE90)';
+            setTimeout(() => {
+                fileButton.innerHTML = '📷 Фото';
+                fileButton.style.background = '';
+            }, 2000);
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+document.getElementById('userInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') sendMessage();
+});
+
+window.addEventListener('load', function() {
+    document.querySelector('.container').style.animation = 'fadeIn 0.8s ease-out';
 });
 </script>
 </body>
 </html>
+
+        
