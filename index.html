@@ -317,14 +317,12 @@
         let selectedImage = null;
         let userId = 'user_' + Math.random().toString(36).substr(2, 9);
 
-        // Автоматическое изменение размера textarea
         const messageInput = document.getElementById('messageInput');
         messageInput.addEventListener('input', function() {
             this.style.height = '44px';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
 
-        // Отправка по Enter (без Shift)
         messageInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -343,7 +341,6 @@
         function showImagePreview(file) {
             const previewContainer = document.getElementById('imagePreviewContainer');
             const reader = new FileReader();
-            
             reader.onload = function(e) {
                 previewContainer.innerHTML = `
                     <div class="image-preview">
@@ -352,7 +349,6 @@
                     </div>
                 `;
             };
-            
             reader.readAsDataURL(file);
         }
 
@@ -418,7 +414,6 @@
 
         async function sendMessage() {
             const message = messageInput.value.trim();
-            
             if (!message && !selectedImage) return;
             
             const sendButton = document.getElementById('sendButton');
@@ -427,32 +422,26 @@
             let imageBase64 = null;
             let imageUrl = null;
 
-            // Если есть изображение, конвертируем его
             if (selectedImage) {
                 imageBase64 = await convertImageToBase64(selectedImage);
                 imageUrl = imageBase64;
             }
 
-            // Добавляем сообщение пользователя
             addMessage(message || '📷 Изображение отправлено', 'user', imageUrl);
             
-            // Очищаем поля
             messageInput.value = '';
             messageInput.style.height = '44px';
             removeImage();
             
-            // Показываем загрузку
             showLoading();
 
             try {
-                // Подготавливаем данные для отправки
                 const requestData = {
                     user_id: userId,
                     message: message || 'Анализ изображения',
                     timestamp: new Date().toISOString()
                 };
 
-                // Если есть изображение, добавляем его
                 if (imageBase64) {
                     requestData.image = imageBase64;
                     requestData.has_image = true;
@@ -469,8 +458,8 @@
                 removeLoading();
 
                 if (response.ok) {
-                    const result = await response.text();
-                    addMessage(result || 'Сообщение получено!', 'bot');
+                    const result = await response.json();  // ✅ фикс
+                    addMessage(result.reply || 'Сообщение получено!', 'bot');
                 } else {
                     addMessage('Извините, произошла ошибка при отправке сообщения. Попробуйте еще раз.', 'bot');
                 }
@@ -482,7 +471,6 @@
             sendButton.disabled = false;
         }
 
-        // Удаляем приветственное сообщение при первом клике
         messageInput.addEventListener('focus', function() {
             const welcomeMessage = document.querySelector('.welcome-message');
             if (welcomeMessage) {
